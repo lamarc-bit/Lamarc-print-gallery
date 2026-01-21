@@ -1,1 +1,149 @@
-body{background:black;color:white}
+:root{
+  --bg:#0b0b0c;
+  --text:#f2f2f2;
+  --muted:#a7a7a7;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1200px 700px at 50% 10%, #262626 0%, var(--bg) 60%);
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* HEADER */
+header{
+  position:fixed;
+  top:0; left:0; right:0;
+  padding:18px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  background: linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,0));
+  z-index:10;
+}
+h1{ margin:0; font-size:18px; letter-spacing:.4px; }
+.sub{ margin:0; font-size:13px; color:var(--muted); }
+
+/* STAGE */
+.stage{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  perspective:1200px;
+  padding-top:40px;
+}
+
+.rail{
+  width:min(1200px, 94vw);
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding:30px 20px 320px;
+  scrollbar-width:none;
+}
+.rail::-webkit-scrollbar{ display:none; }
+
+/* CARDS */
+.card{
+  scroll-snap-align:center;
+  flex:0 0 234px;
+  height:234px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition: transform .22s ease, filter .22s ease, opacity .22s ease;
+}
+
+.cover{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  background:#111;
+  outline:1px solid rgba(255,255,255,.10);
+  box-shadow:0 28px 90px rgba(0,0,0,.55);
+  cursor:zoom-in;
+}
+
+/* WHEEL */
+.wheelWrap{
+  position:fixed;
+  left:0; right:0;
+  bottom:90px;
+  display:flex;
+  justify-content:center;
+  z-index:9999;
+}
+
+.dialOverlay{
+  position:absolute;
+  bottom:150px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(92vw, 520px);
+  text-align:center;
+  pointer-events:none;
+}
+
+.dialTitle{
+  font-size:18px;
+  font-weight:800;
+}
+
+.dialMeta{
+  margin-top:3px;
+  font-size:13px;
+  color:rgba(255,255,255,.7);
+}
+
+.wheel{
+  width:130px;
+  height:130px;
+  border-radius:999px;
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), rgba(255,255,255,.05) 60%);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 18px 60px rgba(0,0,0,.55);
+  position:relative;
+  touch-action:none;
+}
+
+.wheelCenter{
+  position:absolute;
+  inset:38px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.25);
+}
+
+.wheelTop,.wheelBottom,.wheelLeft,.wheelRight{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+}
+
+.wheelTop{
+  top:10px; left:50%; transform:translateX(-50%);
+  font-size:11px;
+}
+
+.wheelBottom{
+  bottom:10px; left:50%; transform:translateX(-50%);
+  font-size:12px;
+}
+
+.wheelLeft{
+  left:12px; top:50%; transform:translateY(-50%);
+}
+
+.wheelRight{
+  right:12px; top:50%; transform:translateY(-50%);
+}

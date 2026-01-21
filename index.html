@@ -1,16 +1,40 @@
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script><!doctype html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LaMaRC Prints</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<h1>Gallery</h1>
+  <header>
+    <div>
+      <h1>Prints</h1>
+      <p class="sub">Wheel to browse • tap to zoom • swipe when zoomed</p>
+    </div>
+    <p class="sub">© LaMaRC</p>
+  </header>
 
-<script src="script.js"></script>
+  <main class="stage">
+    <div class="rail" id="rail"></div>
+  </main>
+
+  <div class="wheelWrap">
+    <div class="dialOverlay">
+      <div class="dialTitle" id="dialTitle"></div>
+      <div class="dialMeta" id="dialMeta"></div>
+    </div>
+
+    <div class="wheel" id="wheel" aria-label="Scroll wheel">
+      <div class="wheelTop">GALLERY</div>
+      <div class="wheelLeft">◀◀</div>
+      <div class="wheelRight">▶▶</div>
+      <div class="wheelBottom" id="buyBtn">BUY</div>
+      <button class="wheelCenter" id="centerBtn" aria-label="Select"></button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
-
