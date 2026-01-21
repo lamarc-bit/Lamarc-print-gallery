@@ -1,0 +1,5 @@
+body{background:black;color:white}body{
+  background:black;
+  color:white;
+  font-family:sans-serif;
+}
