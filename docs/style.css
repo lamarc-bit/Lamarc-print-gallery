@@ -147,3 +147,20 @@ h1{ margin:0; font-size:18px; letter-spacing:.4px; }
 .wheelRight{
   right:12px; top:50%; transform:translateY(-50%);
 }
+
+/* ===== VISIBILITY FIX: cards & covers ===== */
+.card{
+  flex: 0 0 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+}
+
+.cover{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #111;
+}
