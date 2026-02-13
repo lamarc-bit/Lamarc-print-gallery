@@ -1,5 +1,3 @@
-/* LaMaRC — wheel scroll (iPod-ish) + visible gallery */
-
 function svgDataUri(label, seed) {
   const a = (seed * 37) % 360;
   const b = (a + 80) % 360;
@@ -12,10 +10,8 @@ function svgDataUri(label, seed) {
       </linearGradient>
     </defs>
     <rect width="1200" height="1200" fill="url(#g)"/>
-    <rect x="40" y="40" width="1120" height="1120"
-      fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
-    <text x="60" y="1100" fill="rgba(255,255,255,.8)"
-      font-family="system-ui" font-size="56" font-weight="800">${label}</text>
+    <rect x="40" y="40" width="1120" height="1120" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+    <text x="60" y="1100" fill="rgba(255,255,255,.85)" font-family="system-ui" font-size="56" font-weight="800">${label}</text>
   </svg>`;
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
 }
@@ -33,113 +29,143 @@ const dialTitle = document.getElementById("dialTitle");
 const dialMeta = document.getElementById("dialMeta");
 const buyBtn = document.getElementById("buyBtn");
 
-rail.innerHTML = "";
-PRINTS.forEach((p) => {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.dataset.title = p.title;
-  card.dataset.meta = p.meta;
-  card.dataset.buy = p.buy;
-  card.innerHTML = `<img class="cover" src="${p.image}" alt="${p.title}">`;
-  rail.appendChild(card);
-});
-
-const cards = [...document.querySelectorAll(".card")];
-
-function centeredIndex() {
-  const rr = rail.getBoundingClientRect();
-  const mid = rr.left + rr.width / 2;
-  let best = 0, dist = Infinity;
-  cards.forEach((c, i) => {
-    const r = c.getBoundingClientRect();
-    const d = Math.abs((r.left + r.right) / 2 - mid);
-    if (d < dist) { dist = d; best = i; }
+if (!rail || !wheelEl || !dialTitle || !dialMeta || !buyBtn) {
+  // Minimal on-screen error (no console needed)
+  document.body.innerHTML = "<pre style='color:#fff;padding:18px'>Missing required IDs in HTML (rail/wheel/dialTitle/dialMeta/buyBtn).</pre>";
+} else {
+  rail.innerHTML = "";
+  PRINTS.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.title = p.title;
+    card.dataset.meta = p.meta;
+    card.dataset.buy = p.buy;
+    card.innerHTML = `<img class="cover" src="${p.image}" alt="${p.title}">`;
+    rail.appendChild(card);
   });
-  return best;
-}
 
-function updateOverlay(i) {
-  const c = cards[i];
-  if (!c) return;
-  dialTitle.textContent = c.dataset.title || "";
-  dialMeta.textContent = c.dataset.meta || "";
-}
+  const cards = [...document.querySelectorAll(".card")];
 
-function scrollToIndex(i, behavior = "smooth") {
-  const c = cards[Math.max(0, Math.min(cards.length - 1, i))];
-  c?.scrollIntoView({ inline: "center", block: "nearest", behavior });
-}
-
-rail.addEventListener("scroll", () => {
-  updateOverlay(centeredIndex());
-}, { passive: true });
-
-updateOverlay(0);
-
-/* BUY opens centered item link */
-buyBtn.addEventListener("click", () => {
-  const url = cards[centeredIndex()]?.dataset.buy;
-  if (url) window.open(url, "_blank", "noopener,noreferrer");
-});
-
-/* ===== Wheel rotation -> scrolling (iPod-ish accel) ===== */
-const BASE_STEP = Math.PI / 8;   // base "click" size
-const DEADZONE = 0.02;
-let dragging = false;
-let lastAngle = 0;
-let lastTime = 0;
-let acc = 0;
-
-function angleFromPointer(e) {
-  const r = wheelEl.getBoundingClientRect();
-  const cx = r.left + r.width / 2;
-  const cy = r.top + r.height / 2;
-  return Math.atan2(e.clientY - cy, e.clientX - cx);
-}
-
-function step(dir) {
-  const cur = centeredIndex();
-  scrollToIndex(cur + dir, "smooth");
-}
-
-wheelEl.addEventListener("pointerdown", (e) => {
-  // ignore clicks on BUY area
-  if (e.target === buyBtn) return;
-  dragging = true;
-  lastAngle = angleFromPointer(e);
-  lastTime = performance.now();
-  acc = 0;
-  wheelEl.setPointerCapture?.(e.pointerId);
-});
-
-wheelEl.addEventListener("pointermove", (e) => {
-  if (!dragging) return;
-
-  const now = performance.now();
-  const a = angleFromPointer(e);
-  let da = a - lastAngle;
-
-  if (da > Math.PI) da -= Math.PI * 2;
-  if (da < -Math.PI) da += Math.PI * 2;
-
-  const dt = Math.max(1, now - lastTime);
-  lastAngle = a;
-  lastTime = now;
-
-  if (Math.abs(da) < DEADZONE) return;
-
-  const speed = Math.min(0.10, Math.abs(da) / dt); // rad/ms
-  const accelFactor = 1 + speed * 45;              // faster spin => smaller stepAngle => more steps
-  const stepAngle = BASE_STEP / accelFactor;
-
-  acc += da;
-
-  while (Math.abs(acc) >= stepAngle) {
-    step(acc > 0 ? +1 : -1);
-    acc += acc > 0 ? -stepAngle : stepAngle;
+  function centeredIndex() {
+    const rr = rail.getBoundingClientRect();
+    const mid = rr.left + rr.width / 2;
+    let best = 0, dist = Infinity;
+    cards.forEach((c, i) => {
+      const r = c.getBoundingClientRect();
+      const d = Math.abs((r.left + r.right) / 2 - mid);
+      if (d < dist) { dist = d; best = i; }
+    });
+    return best;
   }
-});
 
-function endWheel() { dragging = false; acc = 0; }
-wheelEl.addEventListener("pointerup", endWheel);
-wheelEl.addEventListener("pointercancel", endWheel);
+  function updateOverlay(i) {
+    const c = cards[i];
+    if (!c) return;
+    dialTitle.textContent = c.dataset.title || "";
+    dialMeta.textContent = c.dataset.meta || "";
+  }
+
+  function scrollToIndex(i, behavior = "smooth") {
+    const idx = Math.max(0, Math.min(cards.length - 1, i));
+    cards[idx]?.scrollIntoView({ inline: "center", block: "nearest", behavior });
+  }
+
+  rail.addEventListener("scroll", () => updateOverlay(centeredIndex()), { passive: true });
+  updateOverlay(0);
+
+  buyBtn.addEventListener("click", () => {
+    const url = cards[centeredIndex()]?.dataset.buy;
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  });
+
+  // ===== Wheel rotation -> scrolling (Pointer + Touch fallback) =====
+  const BASE_STEP = Math.PI / 8;
+  const DEADZONE = 0.02;
+  let dragging = false;
+  let lastAngle = 0;
+  let lastTime = 0;
+  let acc = 0;
+
+  function angleFromXY(x, y) {
+    const r = wheelEl.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    return Math.atan2(y - cy, x - cx);
+  }
+
+  function step(dir) {
+    const cur = centeredIndex();
+    scrollToIndex(cur + dir, "smooth");
+  }
+
+  function onMoveLike(x, y) {
+    const now = performance.now();
+    const a = angleFromXY(x, y);
+    let da = a - lastAngle;
+
+    if (da > Math.PI) da -= Math.PI * 2;
+    if (da < -Math.PI) da += Math.PI * 2;
+
+    const dt = Math.max(1, now - lastTime);
+    lastAngle = a;
+    lastTime = now;
+
+    if (Math.abs(da) < DEADZONE) return;
+
+    const speed = Math.min(0.10, Math.abs(da) / dt);
+    const accelFactor = 1 + speed * 45;
+    const stepAngle = BASE_STEP / accelFactor;
+
+    acc += da;
+
+    while (Math.abs(acc) >= stepAngle) {
+      step(acc > 0 ? +1 : -1);
+      acc += acc > 0 ? -stepAngle : stepAngle;
+    }
+  }
+
+  function startLike(x, y) {
+    // ignore start on BUY label
+    dragging = true;
+    lastAngle = angleFromXY(x, y);
+    lastTime = performance.now();
+    acc = 0;
+  }
+
+  function endLike() { dragging = false; acc = 0; }
+
+  // Pointer events
+  wheelEl.addEventListener("pointerdown", (e) => {
+    if (e.target === buyBtn) return;
+    startLike(e.clientX, e.clientY);
+    wheelEl.setPointerCapture?.(e.pointerId);
+  });
+
+  wheelEl.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    onMoveLike(e.clientX, e.clientY);
+  });
+
+  wheelEl.addEventListener("pointerup", endLike);
+  wheelEl.addEventListener("pointercancel", endLike);
+
+  // Touch fallback (Android reliable)
+  wheelEl.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    if (!t) return;
+    startLike(t.clientX, t.clientY);
+  }, { passive: true });
+
+  wheelEl.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    if (!t) return;
+    onMoveLike(t.clientX, t.clientY);
+  }, { passive: true });
+
+  wheelEl.addEventListener("touchend", endLike, { passive: true });
+  wheelEl.addEventListener("touchcancel", endLike, { passive: true });
+
+  // Visible debug to confirm JS loaded
+  dialMeta.textContent = (dialMeta.textContent || "") + " • JS OK";
+}
