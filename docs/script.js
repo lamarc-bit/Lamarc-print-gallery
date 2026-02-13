@@ -122,7 +122,11 @@ if (!rail || !wheelEl || !dialTitle || !dialMeta || !buyBtn) {
       step(acc > 0 ? +1 : -1);
       acc += acc > 0 ? -stepAngle : stepAngle;
     }
-  }
+const speed = Math.min(0.22, Math.abs(da) / dt);      // allow higher peak speed
+const norm = speed / 0.018;                           // 0.018 ≈ “normal” turn speed
+const boost = Math.pow(Math.max(0, norm - 1), 1.35);  // non-linear ramp when spinning fast
+const accelFactor = 1 + Math.min(22, boost);          // cap to keep it controllable
+const stepAngle = BASE_STEP / accelFactor;  }
 
   function startLike(x, y) {
     // ignore start on BUY label
@@ -169,3 +173,4 @@ if (!rail || !wheelEl || !dialTitle || !dialMeta || !buyBtn) {
   // Visible debug to confirm JS loaded
   dialMeta.textContent = (dialMeta.textContent || "") + " • JS OK";
 }
+
